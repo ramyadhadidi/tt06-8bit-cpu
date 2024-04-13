@@ -13,10 +13,10 @@
 `define LDB 4'b0001            // Load Byte into Regsiter
 `define STB 4'b0010            // Store Byte from Regsiter
 `define RDS 4'b0011            // Read (store) processor status
-// 1'b0100
-// 1'b0101
-// 1'b0110
-// 1'b0111
+// 1'b0100 NOP
+// 1'b0101 NOP
+// 1'b0110 NOP
+// 1'b0111 NOP
 
 //-- Arithmatics
 `define NOT {1'b1, `ALU_NOT}
@@ -26,7 +26,7 @@
 `define SUB {1'b1, `ALU_SUB}
 `define XOR {1'b1, `ALU_XOR}
 `define INC {1'b1, `ALU_INC}
-// 1'b1111
+// 1'b1111 NOP
 
 // --------------------------------------------------------------------
 //
@@ -101,39 +101,20 @@ module tt_um_8bit_cpu (
 
     reg mux_new_processor_stat;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            data_out <= 8'b0000_0000;
-            processor_stat <= 1'b0;
-        end
-        else begin // DERIVE MUXES and THEN USE IF HERE
-            if (mux_new_processor_stat)
-                processor_stat <= alu_c;
-            if (mux_processor_stat_data_out)
-                data_out <= {7'b0000000, processor_stat};
-            if (mux_new_data_out)
-                data_out <= r_d1;
-            else begin
-                data_out <= data_out;
-                processor_stat <= processor_stat;
-            end
-        end
-    end
-
     always @(*) begin
         case(inst)
             `MVR: begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 0;
-                alu_in1 = 8'hxx;
-                alu_in2 = 8'hxx;
-                alu_op = 3'bxxx;
                 r_reg1 = r1;
                 r_reg2 = 4'bxxxx;
                 w_reg = r2;
                 w_data = r_d1;
                 write = 1'b1;
+                alu_in1 = 8'hxx;
+                alu_in2 = 8'hxx;
+                alu_op = 3'bxxx;
             end
             `LDB: begin
                 mux_new_data_out = 0;
@@ -152,27 +133,27 @@ module tt_um_8bit_cpu (
                 mux_new_data_out = 1;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 0;
-                alu_in1 = 8'hxx;
-                alu_in2 = 8'hxx;
-                alu_op = 3'bxxx;
                 r_reg1 = r1;
                 r_reg2 = 4'bxxxx;
                 w_reg = 4'bxxxx;
                 w_data = 8'hxx;
                 write = 1'b0;
+                alu_in1 = 8'hxx;
+                alu_in2 = 8'hxx;
+                alu_op = 3'bxxx;
             end
             `RDS:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 1;
                 mux_new_processor_stat = 0;
-                alu_in1 = 8'hxx;
-                alu_in2 = 8'hxx;
-                alu_op = 3'bxxx;
                 r_reg1 = 4'bxxxx;
                 r_reg2 = 4'bxxxx;
                 w_reg = 4'bxxxx;
                 w_data = 8'hxx;
                 write = 1'b0;
+                alu_in1 = 8'hxx;
+                alu_in2 = 8'hxx;
+                alu_op = 3'bxxx;
             end
             `NOT:  begin
                 mux_new_data_out = 0;
@@ -191,96 +172,120 @@ module tt_um_8bit_cpu (
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
+                r_reg1 = r2;
+                r_reg2 = r3;
+                w_reg = r1;
+                w_data = alu_out;
+                write = 1'b1;
                 alu_in1 = r_d1;
                 alu_in2 = r_d2;
                 alu_op = `ALU_AND;
-                r_reg1 = r1;
-                r_reg2 = r2;
-                w_reg = r3;
-                w_data = alu_out;
-                write = 1'b1;
             end
             `ORA:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
-                alu_in1 = r_d1;
-                alu_in2 = r_d2;
-                alu_op = `ALU_ORA;
                 r_reg1 = r1;
                 r_reg2 = r2;
                 w_reg = r3;
                 w_data = alu_out;
                 write = 1'b1;
+                alu_in1 = r_d1;
+                alu_in2 = r_d2;
+                alu_op = `ALU_ORA;
             end
             `ADD:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
+                r_reg1 = r2;
+                r_reg2 = r3;
+                w_reg = r1;
+                w_data = alu_out;
+                write = 1'b1;
                 alu_in1 = r_d1;
                 alu_in2 = r_d2;
                 alu_op = `ALU_ADD;
-                r_reg1 = r1;
-                r_reg2 = r2;
-                w_reg = r3;
-                w_data = alu_out;
-                write = 1'b1;
             end
             `SUB:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
+                r_reg1 = r2;
+                r_reg2 = r3;
+                w_reg = r1;
+                w_data = alu_out;
+                write = 1'b1;
                 alu_in1 = r_d1;
                 alu_in2 = r_d2;
                 alu_op = `ALU_SUB;
-                r_reg1 = r1;
-                r_reg2 = r2;
-                w_reg = r3;
-                w_data = alu_out;
-                write = 1'b1;
             end
             `XOR:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
+                r_reg1 = r2;
+                r_reg2 = r3;
+                w_reg = r1;
+                w_data = alu_out;
+                write = 1'b1;
                 alu_in1 = r_d1;
                 alu_in2 = r_d2;
                 alu_op = `ALU_XOR;
-                r_reg1 = r1;
-                r_reg2 = r2;
-                w_reg = r3;
-                w_data = alu_out;
-                write = 1'b1;
             end
             `INC:  begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 1;
-                alu_in1 = r_d1;
-                alu_in2 = r_d2;
-                alu_op = `ALU_INC;
-                r_reg1 = r1;
-                r_reg2 = r2;
-                w_reg = r3;
+                r_reg1 = r2;
+                r_reg2 = 4'bxxxx;
+                w_reg = r1;
                 w_data = alu_out;
                 write = 1'b1;
+                alu_in1 = r_d1;
+                alu_in2 = 8'hxx;
+                alu_op = `ALU_INC;
             end
             default: begin
                 mux_new_data_out = 0;
                 mux_processor_stat_data_out = 0;
                 mux_new_processor_stat = 0;
+                r_reg1 = 4'bxxxx;
+                r_reg2 = 4'bxxxx;
+                w_reg = 4'bxxxx;
+                w_data = 8'hxx;
+                write = 1'b0;
                 alu_in1 = 8'hxx;
                 alu_in2 = 8'hxx;
                 alu_op = 3'bxxx;
-                r_reg1 = 4'bxxxx;
-                r_reg2 = 4'bxxxx;;
-                w_reg = 4'bxxxx;;
-                w_data = 8'hxx;;
-                write = 1'b0;
             end
         endcase
     end
 
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            data_out <= 8'b0000_0000;
+            processor_stat <= 1'b0;
+        end
+        else begin
+            if (mux_new_processor_stat) begin
+                processor_stat <= alu_c;
+                data_out <= data_out;
+            end
+            else if (mux_processor_stat_data_out) begin
+                data_out <= {7'b0000000, processor_stat};
+                processor_stat <= processor_stat;
+            end
+            else if (mux_new_data_out) begin
+                data_out <= r_d1;
+                processor_stat <= processor_stat;
+            end
+            else begin
+                data_out <= data_out;
+                processor_stat <= processor_stat;
+            end
+        end
+    end
 
 endmodule
 
