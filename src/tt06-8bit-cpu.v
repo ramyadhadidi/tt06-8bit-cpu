@@ -292,7 +292,7 @@ endmodule
 // register file --------------------------------------------------------------
 module reg_file #(
     parameter BIT_WIDTH_REG = 8,
-    parameter REG_COUNT = 16,
+    parameter REG_COUNT = 12,
     parameter LOG_REG_COUNT = 4
 )(
     input                               clk,
